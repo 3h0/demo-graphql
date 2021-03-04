@@ -9,14 +9,14 @@ services:
     container_name: nodejs
     restart: always
     depends_on:
-      - db
+      - mysql
     env_file: .env
     environment:
-      - MONGO_USERNAME=$MONGO_USERNAME
-      - MONGO_PASSWORD=$MONGO_PASSWORD
-      - MONGO_HOSTNAME=db
-      - MONGO_PORT=$MONGO_PORT
-      - MONGO_DB=$MONGO_DB
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+      - MYSQL_HOSTNAME=mysql
     ports:
       - "4000:3000"
     volumes:
@@ -25,24 +25,6 @@ services:
     networks:
       - app-network
     command: /home/node/app/node_modules/.bin/nodemon src/server.js
-
-  db:
-    hostname: db
-    image: mongo:4.1.8-xenial
-    container_name: db
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=$MONGO_USERNAME
-      - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
-    volumes:
-      - dbdata:/data/db
-    networks:
-      - app-network
-    expose:
-      - 27017
-    ports:
-      - 30003:27017
   
   mysql:
     hostname: mysql
@@ -55,6 +37,7 @@ services:
       - MYSQL_DATABASE=$MYSQL_DATABASE
       - MYSQL_USER=$MYSQL_USER
       - MYSQL_PASSWORD=$MYSQL_PASSWORD
+      - MYSQL_HOSTNAME=mysql
     volumes:
       - mysqldata:/data/mysql
     networks:
@@ -69,7 +52,6 @@ networks:
     driver: bridge
 
 volumes:
-  dbdata:
   node_modules:
   mysqldata:
   

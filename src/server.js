@@ -1,38 +1,52 @@
-var express = require('express');
-var { graphqlHTTP } = require('express-graphql');
-var { buildSchema } = require('graphql');
+const { ApolloServer, gql } = require('apollo-server');
 
-// var db = require('./config/db');
-var mysql = require('./config/mysql');
 var sequelize = require('./utils/database');
-
 var example = require('./model/example.model');
 
-sequelize.sync();
-sequelize.sync({force:true});
+// sequelize.sync();
+sequelize.sync({force:true}).then(function () {
+  console.log('Okay');
+}, function (err) {
+  console.log('Error');
+});
 
-var schema = buildSchema(`
-  type Query {
-    hello: String
+const typeDefs = gql`
+  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
+
+  # This "Book" type defines the queryable fields for every book in our data source.
+  type Book {
+    title: String
+    author: String
   }
-`);
 
-var root = {
-  hello: () => {
-    return 'Hello world!';
+  # The "Query" type is special: it lists all of the available queries that
+  # clients can execute, along with the return type for each. In this
+  # case, the "books" query returns an array of zero or more Books (defined above).
+  type Query {
+    books: [Book]
+  }
+`;
+
+const books = [
+  {
+    title: 'The Awakening',
+    author: 'Kate Chopin',
+  },
+  {
+    title: 'City of Glass',
+    author: 'Paul Auster',
+  },
+];
+
+const resolvers = {
+  Query: {
+    books: () => books,
   },
 };
 
+const server = new ApolloServer({ typeDefs, resolvers });
 
-var app = express();
-
-//Khai báo API graphql
-app.use('/graphql', graphqlHTTP({
-  schema: schema,
-  rootValue: root,
-  graphiql: true,
-}));
-
-// Khởi tạo server tại port 4000
-app.listen(4000);
-console.log('Running a GraphQL API server at http://localhost:3000/graphql');
+// The `listen` method launches a web server.
+server.listen(3000).then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
+});

@@ -11,8 +11,11 @@ const sequelize = new Sequelize(
     MYSQL_USER,
     MYSQL_PASSWORD, {
         dialect: 'mysql',
-        host: MYSQL_HOSTNAME,
-        port: MYSQL_PORT
+        host: 'mysql',
+        port: '3306',
+        define: {
+            timestamps: false
+        }
     }
 )
 
